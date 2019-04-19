@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>VNJM.cz - {{ title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='basic.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename=style) }}">
+</head>
+<body>
+<nav>
+    <p id="logo">VNJM.cz</p>
+    <p id="logo_under">Vše na jednom místě</p>
+    <div id="links">
+        <a href="{{ url_for('novinky') }}"><p>Novinky</p></a>
+        <a href=""><p>Sport</p></a>
+        <a href=""><p>Politika</p>
+        <a href=""><p>Byznys</p></a>
+        <a href="{{ url_for('personalizace') }}"><p>Personalizace</p>
+        <a href=""><p>Nastavení</p></a>
+    </div>
+    {% if current_user.is_authenticated %}
+        <div id="register">
+            <a href="{{ url_for('logout') }}"><p>Odhlásit se</p></a>
+        </div>
+    {% else %}
+        <div id="login">
+            <a href="{{ url_for('login') }}"><p>Příhlásit se</p></a>
+        </div>
+        <div id="register">
+            <a href="{{ url_for('register') }}"><p>Registrovat se</p></a>
+        </div>
+    {% endif %}
+</nav>
+<div id="article">
+{% block content %}
+{% endblock %}
+</div>
+
+</body>
+</html>

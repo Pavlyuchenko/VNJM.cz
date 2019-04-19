@@ -1,0 +1,71 @@
+@font-face {
+    font-family: "Sometype Mono";
+    src: url("SometypeMono.otf");
+}
+
+body{
+    font-family: "Sometype Mono";
+    background-color: #E2E2E2;
+}
+
+nav{
+    height: 100%;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    overflow-x: hidden;
+    width: 13%;
+    padding-left: 1.5%;
+    background-color: #2A67C3;
+    color: #FFFFFF;
+}
+
+#logo{
+    margin-top: 9%;
+    font-size: 2.75vw;
+    margin-bottom: 0;
+}
+
+#logo_under{
+    margin-top: 0px;
+    font-size: 1vw;
+}
+
+#links{
+    margin-left: 10%;
+    margin-top: 30%;
+}
+
+#links p{
+    margin-bottom: 15%;
+    font-size: .9vw;
+}
+
+#login{
+    position: absolute;
+    bottom: 0;
+    left: 5%;
+    font-size: .7vw;
+}
+
+#register{
+    position: absolute;
+    bottom: 0;
+    right: 5%;
+    font-size: .7vw;
+}
+
+#article{
+    margin-left: 19%;
+}
+
+a{
+    text-decoration: none;
+    color: #FFFFFF;
+    transition: .2s;
+}
+
+a:hover {
+    color: #cccccc;
+}

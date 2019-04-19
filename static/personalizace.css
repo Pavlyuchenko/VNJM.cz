@@ -1,0 +1,139 @@
+html {
+  scroll-behavior: smooth;
+}
+
+.h1{
+    color: #2A67C3;
+    font-size: 2.5vw;
+}
+
+.section{
+    float:left;
+}
+
+.stranka{
+    -webkit-filter: brightness(100%);
+    float: left;
+    margin-right: 5%;
+    margin-bottom: 3%;
+    border-radius: 500px;
+}
+
+.stranka:hover img{
+    -webkit-filter: brightness(65%);
+    -webkit-transition: all .45s ease;
+    -moz-transition: all .45s ease;
+    -o-transition: all .45s ease;
+    -ms-transition: all .45s ease;
+    transition: all .45s ease;
+    cursor: pointer;
+}
+
+.stranka div{
+    z-index: 1;
+}
+
+article a{
+    color: #2A67C3;
+}
+
+.stranka img{
+    height: auto;
+    max-width: 15vw;
+}
+
+.anim{
+    background-color: #69bd45;
+    position: absolute;
+    height: 5vw;
+    width: 5vw;
+    border-radius: 50%;
+    left: 5vw;
+    top: 5vw;
+    -webkit-animation: dropdown 350ms ease-in-out forwards;
+    -webkit-transform-origin: 50% 50%;
+    overflow: hidden;
+}
+
+@-webkit-keyframes dropdown {
+  0% {
+    opacity: 0;
+    -webkit-transform: translateY(-150px);
+  }
+  70%{
+    opacity: .8;
+    -webkit-transform: translateY(40px);
+  }
+  100% {
+    opacity: 1;
+    -webkit-transform: translateY(0px);
+  }
+}
+
+
+.checkmark.draw:after {
+    -webkit-animation: checkmark 650ms ease forwards;
+    animation: checkmark 650ms ease forwards;
+    transform: scaleX(-1) rotate(135deg);
+}
+
+
+.checkmark:after {
+    opacity: 1;
+    height: 2.5vw;
+    width: 1.3vw;
+    transform-origin: left top;
+    border-right: 5px solid #FFFFFF;
+    border-top: 5px solid #FFFFFF;
+    content: '';
+    left: 1.1vw;
+    top: 2.6vw;
+    position: absolute;
+}
+
+@-webkit-keyframes checkmark {
+  38% {
+    height: 0;
+    width: 0;
+    opacity: 0;
+  }
+  45% {
+    height: 0;
+    width: 0.8em;
+    opacity: 1;
+  }
+  65% {
+    height: 0em;
+    width: 1.5em;
+    opacity: 1;
+  }
+  100% {
+    height: 2.8em;
+    width: 1.5em;
+    opacity: 1;
+  }
+}
+
+@keyframes checkmark {
+  38% {
+    height: 0;
+    width: 0;
+    opacity: 0;
+  }
+  45% {
+    height: 0;
+    width: 0.8em;
+    opacity: 1;
+  }
+  65% {
+    height: 0em;
+    width: 1.5em;
+    opacity: 1;
+  }
+  100% {
+    height: 2.5vw;
+    width: 1.3vw;
+    opacity: 1;
+  }
+}
+

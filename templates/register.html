@@ -1,0 +1,44 @@
+{% extends 'basic.html' %}
+{% block content %}
+<form method="POST">
+    {{ form.hidden_tag() }}
+    <section>
+        <p class="register-h3">Registrace</p>
+        <div class="register-email-div">
+            {% if form.email.errors %}
+                {% for error in form.email.errors %}
+                    <div class="mb-10">
+                        {{ form.email(class="type-text", type="text", placeholder="Email") }}
+                        <p class="error-p">{{ error }}</p>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div style="margin-bottom: 10%;">
+                    {{ form.email(class="type-text", type="text", placeholder="Email") }}
+                </div>
+            {% endif %}
+        </div>
+        <div class="register-password-div">
+            {% if form.password.errors %}
+                {% for error in form.password.errors %}
+                    <div class="mb-10">
+                        {{ form.password(class="type-text", type="password", placeholder="Heslo") }}
+                        <p class="error-p">{{ error }}</p>
+                    </div>
+                {% endfor %}
+            {% else %}
+            <div class="col-3" style="margin-bottom: 10%;">
+                {{ form.password(class="type-text", type="password", placeholder="Heslo") }}
+            </div>
+            {% endif %}
+        </div>
+        <div>
+            {{ form.submit(class="submit") }}
+        </div>
+        <div>
+            <span class="register-span">Již máš účet? <a href="{{ url_for('login') }}">Přihlaš se!</a></span>
+        </div>
+    </section>
+</form>
+</body>
+{% endblock %}

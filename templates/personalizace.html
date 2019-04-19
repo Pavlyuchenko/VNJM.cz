@@ -1,0 +1,201 @@
+{% extends 'basic.html' %}
+{% block content %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script language="javascript">
+    function changeImage(name)
+    {
+        element=document.getElementById(name)
+        name_checkmark = name + "_checkmark"
+        ch=document.getElementById(name_checkmark)
+        name_anim = name + "_anim"
+        el=document.getElementById(name_anim)
+        name_not_chosen = "/static/" + name + '.png';
+        name_chosen = "/static/" + name + '_chosen.png';
+        if (element.src.match("chosen"))
+        {
+            element.src=name_not_chosen;
+            el.style.display = "none";
+            ch.style.display = "none";
+        }
+        else
+        {
+            element.src=name_chosen;
+            el.style.display = "block";
+            ch.style.display = "block";
+        }
+    }
+
+    $(function() {
+          $('a.test').bind('click', function() {
+            $.getJSON('{{ url_for('vyber_sluzby') }}', {
+                post: $(this).attr("id")
+            },
+                function(data) {
+
+            });
+            return false;
+          });
+        });
+</script>
+<article>
+    <a href="#sport">Click Here to Smoothly Scroll Down</a>
+    <div class="section">
+        <p class="h1">Novinky</p>
+        <form>
+            <a href="#" class="test" id="0">
+                <div class="stranka">
+                    {% if current_user.idnes == 0 %}
+                    <img src="{{ url_for('static', filename='idnes.png') }}" onclick="changeImage('idnes')" id="idnes" alt="iDnes">
+                        <div onclick="changeImage('idnes')" id="idnes_anim" class="anim" style="display: none;"><div id="idnes_checkmark" class="checkmark draw"></div></div>
+                    {% else %}
+                    <img src="{{ url_for('static', filename='idnes_chosen.png') }}" onclick="changeImage('idnes')" id="idnes" alt="iDnes">
+                        <div onclick="changeImage('idnes')" id="idnes_anim" class="anim"><div id="idnes_checkmark" class="checkmark draw"></div></div>
+                    {% endif %}
+                </div>
+            </a>
+        </form>
+        <form>
+            <a href="#" class="test" id="1">
+                <div class="stranka">
+                    {% if current_user.seznam == 0 %}
+                    <img src="{{ url_for('static', filename='seznam.png') }}" onclick="changeImage('seznam')" id="seznam" alt="Seznam">
+                        <div onclick="changeImage('seznam')" id="seznam_anim" class="anim" style="display: none;"><div id="seznam_checkmark" class="checkmark draw"></div></div>
+                    {% else %}
+                    <img src="{{ url_for('static', filename='seznam_chosen.png') }}" onclick="changeImage('seznam')" id="seznam" alt="Seznam">
+                        <div onclick="changeImage('seznam')" id="seznam_anim" class="anim"><div id="seznam_checkmark" class="checkmark draw"></div></div>
+                    {% endif %}
+                </div>
+            </a>
+        </form>
+        <form>
+            <a href="#" class="test" id="2">
+                <div class="stranka">
+                    {% if current_user.lidovky == 0 %}
+                    <img src="{{ url_for('static', filename='lidovky.png') }}" onclick="changeImage('lidovky')" id="lidovky" alt="Lidovky">
+                        <div onclick="changeImage('lidovky')" id="lidovky_anim" class="anim" style="display: none;"><div id="lidovky_checkmark" class="checkmark draw"></div></div>
+                    {% else %}
+                    <img src="{{ url_for('static', filename='lidovky_chosen.png') }}" onclick="changeImage('lidovky')" id="lidovky" alt="Lidovky">
+                        <div onclick="changeImage('lidovky')" id="lidovky_anim" class="anim"><div id="lidovky_checkmark" class="checkmark draw"></div></div>
+                    {% endif %}
+                </div>
+            </a>
+        </form>
+        <form>
+            <a href="#" class="test" id="3">
+                <div class="stranka">
+                    {% if current_user.novinky == 0 %}
+                    <img src="{{ url_for('static', filename='novinky.png') }}" onclick="changeImage('novinky')" id="novinky" alt="Novinky">
+                        <div onclick="changeImage('novinky')" id="novinky_anim" class="anim" style="display: none;"><div id="novinky_checkmark" class="checkmark draw"></div></div>
+                    {% else %}
+                    <img src="{{ url_for('static', filename='novinky_chosen.png') }}" onclick="changeImage('novinky')" id="novinky" alt="Novinky">
+                        <div onclick="changeImage('novinky')" id="novinky_anim" class="anim"><div id="novinky_checkmark" class="checkmark draw"></div></div>
+                    {% endif %}
+                </div>
+            </a>
+        </form>
+        <form>
+            <a href="#" class="test" id="4">
+                <div class="stranka">
+                    {% if current_user.aktualne == 0 %}
+                    <img src="{{ url_for('static', filename='aktualne.png') }}" onclick="changeImage('aktualne')" id="aktualne" alt="Aktuálně ">
+                        <div onclick="changeImage('aktualne')" id="aktualne_anim" class="anim" style="display: none;"><div id="aktualne_checkmark" class="checkmark draw"></div></div>
+                    {% else %}
+                    <img src="{{ url_for('static', filename='aktualne_chosen.png') }}" onclick="changeImage('aktualne')" id="aktualne" alt="Aktuálně">
+                        <div onclick="changeImage('aktualne')" id="aktualne_anim" class="anim"><div id="aktualne_checkmark" class="checkmark draw"></div></div>
+                    {% endif %}
+                </div>
+            </a>
+        </form>
+        <form>
+            <a href="#" class="test" id="5">
+                <div class="stranka">
+                    {% if current_user.reflex == 0 %}
+                    <img src="{{ url_for('static', filename='reflex.png') }}" onclick="changeImage('reflex')" id="reflex" alt="Reflex">
+                        <div onclick="changeImage('reflex')" id="reflex_anim" class="anim" style="display: none;"><div id="reflex_checkmark" class="checkmark draw"></div></div>
+                    {% else %}
+                    <img src="{{ url_for('static', filename='reflex_chosen.png') }}" onclick="changeImage('reflex')" id="reflex" alt="Reflex">
+                        <div onclick="changeImage('reflex')" id="reflex_anim" class="anim"><div id="reflex_checkmark" class="checkmark draw"></div></div>
+                    {% endif %}
+                </div>
+            </a>
+        </form>
+        <form>
+            <a href="#" class="test" id="6">
+                <div class="stranka">
+                    {% if current_user.e15 == 0 %}
+                    <img src="{{ url_for('static', filename='e15.png') }}" onclick="changeImage('e15')" id="e15" alt="e15">
+                        <div onclick="changeImage('e15')" id="e15_anim" class="anim" style="display: none;"><div id="novinky_checkmark" class="checkmark draw"></div></div>
+                    {% else %}
+                    <img src="{{ url_for('static', filename='e15_chosen.png') }}" onclick="changeImage('e15')" id="e15" alt="e15">
+                        <div onclick="changeImage('e15')" id="e15_anim" class="anim"><div id="e15_checkmark" class="checkmark draw"></div></div>
+                    {% endif %}
+                </div>
+            </a>
+        </form>
+        <div class="stranka">
+            <img src="{{ url_for('static', filename='lidovky.png') }}" alt="Lidovky">
+        </div>
+        <div class="stranka">
+            <img src="{{ url_for('static', filename='novinky.png') }}" alt="Novinky">
+        </div>
+        <div class="stranka">
+            <img src="{{ url_for('static', filename='seznam.png') }}" alt="Seznam">
+        </div>
+        <div class="stranka">
+            <img src="{{ url_for('static', filename='idnes.png') }}" alt="iDnes">
+        </div>
+        <div class="stranka">
+            <img src="{{ url_for('static', filename='novinky.png') }}" alt="Novinky">
+        </div>
+        <div class="stranka">
+            <img src="{{ url_for('static', filename='lidovky.png') }}" alt="Lidovky">
+        </div>
+        <div class="stranka">
+            <img src="{{ url_for('static', filename='idnes.png') }}" alt="iDnes">
+        </div>
+        <div class="stranka">
+            <img src="{{ url_for('static', filename='seznam.png') }}" alt="Seznam">
+        </div>
+    </div>
+    <div class="section">
+        <div id="sport" ></div>
+        <p class="h1">Sport</p>
+        <div class="stranka">
+            <img src="{{ url_for('static', filename='idnes.png') }}" alt="iDnes">
+        </div>
+        <div class="stranka">
+            <img src="{{ url_for('static', filename='seznam.png') }}" alt="Seznam">
+        </div>
+        <div class="stranka">
+            <img src="{{ url_for('static', filename='lidovky.png') }}" alt="Lidovky">
+        </div>
+        <div class="stranka">
+            <img src="{{ url_for('static', filename='novinky.png') }}" alt="Novinky">
+        </div>
+        <div class="stranka">
+            <img src="{{ url_for('static', filename='lidovky.png') }}" alt="Lidovky">
+        </div>
+        <div class="stranka">
+            <img src="{{ url_for('static', filename='novinky.png') }}" alt="Novinky">
+        </div>
+        <div class="stranka">
+            <img src="{{ url_for('static', filename='seznam.png') }}" alt="Seznam">
+        </div>
+        <div class="stranka">
+            <img src="{{ url_for('static', filename='idnes.png') }}" alt="iDnes">
+        </div>
+        <div class="stranka">
+            <img src="{{ url_for('static', filename='novinky.png') }}" alt="Novinky">
+        </div>
+        <div class="stranka">
+            <img src="{{ url_for('static', filename='lidovky.png') }}" alt="Lidovky">
+        </div>
+        <div class="stranka">
+            <img src="{{ url_for('static', filename='idnes.png') }}" alt="iDnes">
+        </div>
+        <div class="stranka">
+            <img src="{{ url_for('static', filename='seznam.png') }}" alt="Seznam">
+        </div>
+    </div>
+</article>
+{% endblock %}

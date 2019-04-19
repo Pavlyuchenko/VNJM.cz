@@ -1,0 +1,15 @@
+{% extends 'basic.html' %}
+{% block content %}
+  <div class="errors">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="login-alert-{{ category }}" id="hide_alert">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+  <div class="spinner-1"></div>
+{% endblock %}

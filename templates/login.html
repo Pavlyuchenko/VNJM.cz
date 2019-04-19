@@ -1,0 +1,59 @@
+{% extends "basic.html" %}
+{% block content %}
+    <section>
+        <div class="errors">
+          {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+              {% for category, message in messages %}
+                <div class="login-alert-{{ category }}" id="hide_alert">
+                    {{ message }}
+                </div>
+              {% endfor %}
+            {% endif %}
+          {% endwith %}
+        </div>
+        <form method="POST" action="">
+        {{ form.hidden_tag() }}
+        <p class="login-h3">Přihlášení</p>
+        <div class="login-email-div">
+            {% if form.email.errors %}
+                {{ form.email(class="form-control form-control-lg is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in form.email.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="col-3" style="margin-bottom: 10%;">
+                    {{ form.email(class="type-text", type="text", placeholder="Email") }}
+                </div>
+            {% endif %}
+        </div>
+        <div class="login-password-div">
+            {% if form.password.errors %}
+                {{ form.password(class="form-control form-control-lg is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in form.password.errors %}
+                    <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="col-3">
+                    {{ form.password(class="type-text", type="password", placeholder="Heslo") }}
+                </div>
+            {% endif %}
+        </div>
+        <div class="login-check">
+            <label class="container">
+                {{ form.remember(class="form-check-input") }}
+                <span class="checkmark"></span>
+                Pamatovat si
+            </label>
+        </div>
+        <div class="login-submit">
+            {{ form.submit(class="submit") }}
+        </div>
+        <span class="login-register">Ještě nemáš účet? &nbsp;<a href="{{ url_for('register') }}">Zaregistruj se!</a></span>
+    </section>
+</form>
+{% endblock content %}
