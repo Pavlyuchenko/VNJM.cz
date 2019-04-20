@@ -11,5 +11,17 @@
       {% endif %}
     {% endwith %}
   </div>
-  <div class="spinner-1"></div>
+  <!---<div class="spinner-1"></div> --->
+  <div>
+    {% if current_user.is_authenticated %}
+    {% for clanek in clanky %}
+        <h1>{{ clanek.titulek }}</h1>
+        <small>{{ clanek.date }}</small>
+        <p>{{ clanek.content }}</p>
+        <a target="_blank" href={{clanek.url}}>Odkaz</a>
+        <img width="288" height="162" src={{ clanek.img }} alt="Obrázek">
+        <p>{{ clanek.sluzba }}</p>
+    {% endfor %}
+    {% endif %}
+  </div>
 {% endblock %}

@@ -14,6 +14,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 def article_download():
     idnes()
+    seznam()
 
 
 scheduler = BackgroundScheduler()
@@ -48,25 +49,25 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(60), nullable=False)
     # idnes_count = db.relationship('idnes', backref='author', lazy=True)
-    idnes = db.Column(db.Integer)
-    seznam = db.Column(db.Integer)
-    lidovky = db.Column(db.Integer)
-    novinky = db.Column(db.Integer)
-    aktualne = db.Column(db.Integer)
-    reflex = db.Column(db.Integer)
-    e15 = db.Column(db.Integer)
-    date_registered = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    idnes = db.Column(db.Boolean)
+    seznam = db.Column(db.Boolean)
+    lidovky = db.Column(db.Boolean)
+    novinky = db.Column(db.Boolean)
+    aktualne = db.Column(db.Boolean)
+    reflex = db.Column(db.Boolean)
+    e15 = db.Column(db.Boolean)
+    date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 class Clanek(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     titulek = db.Column(db.String(1000), nullable=False)
     content = db.Column(db.Text, nullable=False)
-    img = db.Column(db.String(500), unique=True, nullable=False)
+    img = db.Column(db.String(500), nullable=False)
     date = db.Column(db.String(100), nullable=False)
     url = db.Column(db.String(500), nullable=False)
     sluzba = db.Column(db.Integer, nullable=False)
-    date_created = db.Column(db.DateTime, default=datetime.utcnow)
+    order_date = db.Column(db.Integer, nullable=False)
 
 from forms import RegistrationForm, LoginForm
 
@@ -88,7 +89,7 @@ def login_required(f):
 
 @app.route("/")
 def novinky():
-    return render_template('novinky.html', style="novinky.css", title="Vše na jednom místě")
+    return render_template('novinky.html', style="novinky.css", title="Vše na jednom místě", clanky=clanky())
 
 
 @app.route("/personalizace")
@@ -101,44 +102,42 @@ def personalizace():
 @login_required
 def vyber_sluzby():
     post = request.args.get('post', 0, type=int)
-    if post == 0 and current_user.idnes == 0:
-        current_user.idnes = 1
+    if post == 0 and not current_user.idnes:
+        current_user.idnes = True
     elif post == 0:
-        current_user.idnes = 0
+        current_user.idnes = False
 
-    if post == 1 and current_user.seznam == 0:
-        current_user.seznam = 1
+    if post == 1 and not current_user.seznam:
+        current_user.seznam = True
     elif post == 1:
-        current_user.seznam = 0
+        current_user.seznam = False
 
-    if post == 2 and current_user.lidovky == 0:
-        current_user.lidovky = 1
+    if post == 2 and not current_user.lidovky:
+        current_user.lidovky = True
     elif post == 2:
-        current_user.lidovky = 0
+        current_user.lidovky = False
 
-    if post == 3 and current_user.novinky == 0:
-        current_user.novinky = 1
+    if post == 3 and not current_user.novinky:
+        current_user.novinky = True
     elif post == 3:
-        current_user.novinky = 0
+        current_user.novinky = False
 
-    if post == 4 and current_user.aktualne == 0:
-        current_user.aktualne = 1
+    if post == 4 and not current_user.aktualne:
+        current_user.aktualne = True
     elif post == 4:
-        current_user.aktualne = 0
+        current_user.aktualne = False
 
-    if post == 5 and current_user.reflex == 0:
-        current_user.reflex = 1
+    if post == 5 and not current_user.reflex:
+        current_user.reflex = True
     elif post == 5:
-        current_user.reflex = 0
+        current_user.reflex = False
 
-    if post == 6 and current_user.e15 == 0:
-        current_user.e15 = 1
+    if post == 6 and not current_user.e15:
+        current_user.e15 = True
     elif post == 6:
-        current_user.e15 = 0
+        current_user.e15 = False
 
     db.session.commit()
-    print(current_user.idnes)
-    print(post)
     return ""
 
 
@@ -182,6 +181,8 @@ def logout():
 
 def idnes():
     urls = ['https://www.idnes.cz/zpravy/cerna-kronika', 'https://www.idnes.cz/zpravy/domaci', 'https://www.idnes.cz/zpravy/zahranicni']
+    now = datetime.now()
+    month_number = str(now.month)
     for i in range(3):
         for j in range(2):
             url = requests.get(urls[i])
@@ -202,7 +203,110 @@ def idnes():
                 content = " ".join(soup.select('.opener')[0].text.split())
                 date = " ".join(soup.select('.time')[0].text.split()).split(',', 1)[0]
 
-                clanek = Clanek(titulek=nadpis, content=content, img=img, date=date, url=url_text, sluzba=0)
+                if (int(date.split(" ")[-1].split(":")[0]) / 10) >= 1:
+                    order_date = date.split('.', 1)[0] + month_number + date.split(" ")[-1].split(":")[0] + date.split(" ")[-1].split(":")[1]
+                else:
+                    order_date = date.split('.', 1)[0] + month_number + str(0) + date.split(" ")[-1].split(":")[0] + date.split(" ")[-1].split(":")[1]
+
+                clanek = Clanek(titulek=nadpis, content=content, img=img, date=date, url=url_text, sluzba=0, order_date=order_date)
                 db.session.add(clanek)
                 db.session.commit()
-                print("Downloaded new article")
+                print("Downloaded new article - iDnes")
+
+
+def seznam():
+    urls = ['https://www.seznamzpravy.cz/sekce/domaci', 'https://www.seznamzpravy.cz/sekce/zahranicni']
+    now = datetime.now()
+    den = str(now.day)
+    month_number = int(now.month)
+    month = str(month_conversion(month_number))
+    year = str(now.year)
+    for i in range(2):
+        for j in range(2):
+            url = requests.get(urls[i])
+            soup = BeautifulSoup(url.text, features="html.parser")
+            unique = True
+            nadpis = soup.select('h3')[j].text
+            clanky = Clanek.query.all()
+            for clanek in clanky:
+                if clanek.titulek == nadpis:
+                    unique = False
+
+            if unique:
+                url_text = soup.select('.d_ba a')[j]['href']
+                date = den + ". " + month + " " + year + " " + soup.select('.atm-date-formatted')[j].text
+
+                url = requests.get(url_text)
+                soup = BeautifulSoup(url.text, features="html.parser")
+
+                content = soup.select('.e_g6')[0].text
+                img = soup.select('.e_iv .atm-media-item-image-events img')[0]['src']
+                if (int(date.split(" ")[-1].split(":")[0]) / 10) >= 1:
+                    order_date = date.split('.', 1)[0] + str(month_number) + date.split(" ")[-1].split(":")[0] + date.split(" ")[-1].split(":")[1]
+                else:
+                    order_date = date.split('.', 1)[0] + str(month_number) + str(0) + date.split(" ")[-1].split(":")[0] + date.split(" ")[-1].split(":")[1]
+
+                clanek = Clanek(titulek=nadpis, content=content, img=img, date=date, url=url_text, sluzba=1, order_date=order_date)
+                db.session.add(clanek)
+                db.session.commit()
+                print("Downloaded new article - Seznam")
+
+
+def clanky():
+    if current_user.is_authenticated:
+        clanky = Clanek.query.order_by(Clanek.order_date.desc()).all()
+        clanky_personalized = []
+        for clanek in clanky:
+            if clanek.sluzba == 0 and current_user.idnes:
+                clanky_personalized.append(clanek)
+            elif clanek.sluzba == 1 and current_user.seznam:
+                clanky_personalized.append(clanek)
+            elif clanek.sluzba == 2 and current_user.lidovky:
+                clanky_personalized.append(clanek)
+            elif clanek.sluzba == 3 and current_user.novinky:
+                clanky_personalized.append(clanek)
+            elif clanek.sluzba == 4 and current_user.aktualne:
+                clanky_personalized.append(clanek)
+            elif clanek.sluzba == 5 and current_user.reflex:
+                clanky_personalized.append(clanek)
+            elif clanek.sluzba == 6 and current_user.e15:
+                clanky_personalized.append(clanek)
+            elif clanek.sluzba == 7 and current_user.seznam:
+                clanky_personalized.append(clanek)
+        return clanky_personalized
+
+
+def month_conversion(month):
+    if month == 1:
+        return "ledna"
+    elif month == 2:
+        return "února"
+    elif month == 3:
+        return "března"
+    elif month == 4:
+        return "dubna"
+    elif month == 5:
+        return "května"
+    elif month == 6:
+        return "června"
+    elif month == 7:
+        return "července"
+    elif month == 8:
+        return "srpna"
+    elif month == 9:
+        return "září"
+    elif month == 10:
+        return "října"
+    elif month == 11:
+        return "listopadu"
+    elif month == 12:
+        return "prosince"
+
+
+
+
+
+
+
+
+
