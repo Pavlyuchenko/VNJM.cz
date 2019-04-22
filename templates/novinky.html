@@ -18,7 +18,7 @@
         <h1>{{ clanek.titulek }}</h1>
         <small>{{ clanek.date }}</small>
         <p>{{ clanek.content }}</p>
-        <a target="_blank" href={{clanek.url}}>Odkaz</a>
+        <a target="_blank" href={{ clanek.url }} style="color: black;">Odkaz</a>
         <img width="288" height="162" src={{ clanek.img }} alt="Obrázek">
         <p>{{ clanek.sluzba }}</p>
     {% endfor %}
