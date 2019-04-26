@@ -12,15 +12,22 @@
     {% endwith %}
   </div>
   <!---<div class="spinner-1"></div> --->
-  <div>
+  <div class="main">
     {% if current_user.is_authenticated %}
+        <h1>Novinky</h1>
     {% for clanek in clanky %}
-        <h1>{{ clanek.titulek }}</h1>
-        <small>{{ clanek.date }}</small>
-        <p>{{ clanek.content }}</p>
-        <a target="_blank" href={{ clanek.url }} style="color: black;">Odkaz</a>
-        <img width="288" height="162" src={{ clanek.img }} alt="Obrázek">
-        <p>{{ clanek.sluzba }}</p>
+    <h3>{{ clanek.time }} -</h3>
+      <a href={{ clanek.url }} target="_blank">
+        <div class="div-content">
+            <h2>{{ clanek.titulek }}</h2>
+            <img class="clanek_img" width="192" height="108" src={{ clanek.img }} alt="Obrázek">
+          <div class="perex">
+            <p class="content">{{ clanek.content }}</p>
+          </div>
+            <img class="sluzba" width="60" height="60" src={{ url_for('static', filename=sluzby[clanek.sluzba] + '.png') }} alt="ASD">
+            <small>{{ clanek.date }}</small>
+        </div>
+      </a>
     {% endfor %}
     {% endif %}
   </div>

@@ -14,12 +14,13 @@ import pyperclip
 
 
 def article_download():
-    print("Don't interrupt")
     idnes()
     seznam()
     lidovky()
     novinky()
-    print("Download finished")
+    aktualne()
+    reflex()
+    e15()
 
 
 scheduler = BackgroundScheduler()
@@ -70,6 +71,7 @@ class Clanek(db.Model, UserMixin):
     content = db.Column(db.Text, nullable=False)
     img = db.Column(db.String(500), nullable=False)
     date = db.Column(db.String(100), nullable=False)
+    time = db.Column(db.String(10), nullable=False)
     url = db.Column(db.String(500), nullable=False)
     sluzba = db.Column(db.Integer, nullable=False)
     order_date = db.Column(db.Integer, nullable=False)
@@ -94,7 +96,8 @@ def login_required(f):
 
 @app.route("/")
 def novinky():
-    return render_template('novinky.html', style="novinky.css", title="Vše na jednom místě", clanky=clanky())
+    sluzby = ['idnes', 'seznam', 'lidovky', 'novinky', 'aktualne', 'reflex', 'e15']
+    return render_template('novinky.html', style="novinky.css", title="Vše na jednom místě", clanky=clanky(), sluzby=sluzby)
 
 
 @app.route("/personalizace")
@@ -210,20 +213,24 @@ def idnes():
                     soup = BeautifulSoup(url.text, features="html.parser")
 
                     content = " ".join(soup.select('.opener')[0].text.split())
+                    cont = True
                     for clanek in clanky:
                         if clanek.content == content:
-                            break
-                    date = " ".join(soup.select('.time')[0].text.split()).split(',', 1)[0]
+                            cont = False
 
-                    if (int(date.split(" ")[-1].split(":")[0]) / 10) >= 1:
-                        order_date = year + month_number + day_number + date.split(" ")[-1].split(":")[0] + date.split(" ")[-1].split(":")[1]
-                    else:
-                        order_date = year + month_number + day_number + str(0) + date.split(" ")[-1].split(":")[0] + date.split(" ")[-1].split(":")[1]
+                    if cont:
+                        date = " ".join(" ".join(soup.select('.time')[0].text.split()).split(',', 1)[0].split()[:3])
+                        time = " ".join(soup.select('.time')[0].text.split()).split(',', 1)[0].split()[3]
 
-                    clanek = Clanek(titulek=nadpis, content=content, img=img, date=date, url=url_text, sluzba=0, order_date=order_date)
-                    db.session.add(clanek)
-                    db.session.commit()
-                    print("Downloaded new article - iDnes")
+                        if (int(date.split(" ")[-1].split(":")[0]) / 10) >= 1:
+                            order_date = year + month_number + day_number + time.split(" ")[-1].split(":")[0] + time.split(" ")[-1].split(":")[1]
+                        else:
+                            order_date = year + month_number + day_number + str(0) + time.split(" ")[-1].split(":")[0] + time.split(" ")[-1].split(":")[1]
+
+                        clanek = Clanek(titulek=nadpis, content=content, img=img, date=date, time=time, url=url_text, sluzba=0, order_date=order_date)
+                        db.session.add(clanek)
+                        db.session.commit()
+                        print("Downloaded new article - iDnes")
     except Exception as e:
         print("Bug:", e)
 
@@ -250,25 +257,31 @@ def seznam():
 
             if unique:
                 url_text = soup.select('.d_ba a')[j]['href']
-                date = den + ". " + month + " " + year + " " + soup.select('.atm-date-formatted')[j].text
+                date = den + ". " + month + " " + year
+                time = soup.select('.atm-date-formatted')[j].text
 
                 url = requests.get(url_text)
                 soup = BeautifulSoup(url.text, features="html.parser")
 
                 content = soup.select('.e_g6')[0].text
+                cont = True
                 for clanek in clanky:
                     if clanek.content == content:
-                        break
-                img = soup.select('.e_iv .atm-media-item-image-events img')[0]['src']
-                if (int(date.split(" ")[-1].split(":")[0]) / 10) >= 1:
-                    order_date = year + month_number_date + day_number + date.split(" ")[-1].split(":")[0] + date.split(" ")[-1].split(":")[1]
-                else:
-                    order_date = year + month_number_date + day_number + str(0) + date.split(" ")[-1].split(":")[0] + date.split(" ")[-1].split(":")[1]
+                        cont = False
+                if cont:
+                    try:
+                        img = soup.select('.c_ab .atm-media-item-image-events img')[0]['src']
+                    except:
+                        img = soup.select('.d_ch .atm-media-item-image-events img')[0]['src']
+                    if (int(date.split(" ")[-1].split(":")[0]) / 10) >= 1:
+                        order_date = year + month_number_date + day_number + time.split(" ")[-1].split(":")[0] + time.split(" ")[-1].split(":")[1]
+                    else:
+                        order_date = year + month_number_date + day_number + str(0) + time.split(" ")[-1].split(":")[0] + time.split(" ")[-1].split(":")[1]
 
-                clanek = Clanek(titulek=nadpis, content=content, img=img, date=date, url=url_text, sluzba=1, order_date=order_date)
-                db.session.add(clanek)
-                db.session.commit()
-                print("Downloaded new article - Seznam")
+                    clanek = Clanek(titulek=nadpis, content=content, img=img, date=date, time=time, url=url_text, sluzba=1, order_date=order_date)
+                    db.session.add(clanek)
+                    db.session.commit()
+                    print("Downloaded new article - Seznam")
 
 
 def lidovky():
@@ -279,7 +292,9 @@ def lidovky():
     month_number_date = str(now.strftime('%m'))
     day_number = str(now.strftime('%d'))
     for i in range(len(urls)):
-        for j in range(2):
+        for j in range(6):
+            if j == 3:
+                pass
             url = requests.get(urls[i])
             soup = BeautifulSoup(url.text, features="html.parser")
             unique = True
@@ -295,26 +310,38 @@ def lidovky():
                     url_text = soup.select('.art a')[j+j+1]['href']
                 else:
                     url_text = soup.select('.art a')[j+j]['href']
-                content = soup.select('.perex')[j].text
-                for clanek in clanky:
-                    if clanek.content == content:
-                        break
+
+
                 url = requests.get(url_text)
                 soup = BeautifulSoup(url.text, features="html.parser")
-                pyperclip.copy(soup.text)
-                date = soup.select('.time')[0].text
-                img = soup.select('.equ-img img')[0]['src']
-                new_date = date.split(',')[0]
-                new_date = " ".join(new_date.split())
-                if (int(new_date.split(" ")[-1].split(":")[0]) / 10) >= 1:
-                    order_date = year + month_number_date + day_number + new_date.split(" ")[-1].split(":")[0] + new_date.split(" ")[-1].split(":")[1]
-                else:
-                    order_date = year + month_number_date + day_number + str(0) + new_date.split(" ")[-1].split(":")[0] + new_date.split(" ")[-1].split(":")[1]
+                try:
+                    content = soup.select('.opener')[0].text
+                    cont = True
+                    for clanek in clanky:
+                        if clanek.content == content:
+                            cont = False
 
-                clanek = Clanek(titulek=nadpis, content=content, img=img, date=date, url=url_text, sluzba=2, order_date=order_date)
-                db.session.add(clanek)
-                db.session.commit()
-                print("Downloaded new article - Lidovky")
+                    if cont:
+                        date = " ".join(soup.select('.time')[0].text.split()[:3])
+                        time = "".join(soup.select('.time')[0].text.split()[3])
+                        print(time)
+                        img = soup.select('.equ-img img')[0]['src']
+                        new_date = time.split(',')[0]
+                        new_date = " ".join(new_date.split())
+                        if (int(new_date.split(" ")[-1].split(":")[0]) / 10) >= 1:
+                            order_date = year + month_number_date + day_number + new_date.split(" ")[-1].split(":")[0] + \
+                                         new_date.split(" ")[-1].split(":")[1]
+                        else:
+                            order_date = year + month_number_date + day_number + str(0) + \
+                                         new_date.split(" ")[-1].split(":")[0] + new_date.split(" ")[-1].split(":")[1]
+
+                        clanek = Clanek(titulek=nadpis, content=content, img=img, date=date, time=time, url=url_text, sluzba=2,
+                                        order_date=order_date)
+                        db.session.add(clanek)
+                        db.session.commit()
+                        print("Downloaded new article - Lidovky")
+                except Exception as e:
+                    print(e)
 
 
 def novinky():
@@ -324,6 +351,9 @@ def novinky():
     year = str(now.year)
     month_number = str(now.strftime('%m'))
     day_number = str(now.strftime('%d'))
+    day = str(now.day)
+    month = now.month
+    month = str(month_conversion(month))
     for i in range(len(urls)):
         for j in range(2):
             url = requests.get(urls[i])
@@ -338,24 +368,162 @@ def novinky():
                 img = soup.select('.item img')[j]['src']
                 url_text = soup.select('.likeInInfo a')[j]['href']
 
-                date = soup.select('.time')[j].text
+                time = soup.select('.time')[j].text
                 url = requests.get(url_text)
                 soup = BeautifulSoup(url.text, features="html.parser")
                 content = soup.select('.perex')[0].text
-                new_date = " ".join(date.split())
+                new_date = " ".join(time.split())
 
+                cont = True
                 for clanek in clanky:
                     if clanek.content == content:
-                        break
-                if (int(date.split(":")[0]) / 10) >= 1:
-                    order_date = year + month_number + day_number + new_date.split(":")[0] + new_date.split(":")[1]
-                else:
-                    order_date = year + month_number + day_number + str(0) + new_date.split(":")[0] + new_date.split(":")[1]
+                        cont = False
+                if cont:
+                    if (int(time.split(":")[0]) / 10) >= 1:
+                        order_date = year + month_number + day_number + new_date.split(":")[0] + \
+                                     new_date.split(":")[1]
+                    else:
+                        order_date = year + month_number + day_number + str(0) + new_date.split(":")[0] + \
+                                     new_date.split(":")[1]
 
-                clanek = Clanek(titulek=nadpis, content=content, img=img, date=date, url=url_text, sluzba=3, order_date=order_date)
-                db.session.add(clanek)
-                db.session.commit()
-                print("Downloaded new article - Novinky")
+                    date = str(day + ". " + month + " " + year)
+
+                    clanek = Clanek(titulek=nadpis, content=content, img=img, date=date, time=time, url=url_text,
+                                    sluzba=3, order_date=order_date)
+                    db.session.add(clanek)
+                    db.session.commit()
+                    print("Downloaded new article - Novinky")
+
+
+def aktualne():
+    urls = ['https://zpravy.aktualne.cz/domaci/', 'https://zpravy.aktualne.cz/zahranici/']
+    now = datetime.now()
+    year = str(now.year)
+    month_number = str(now.strftime('%m'))
+    day_number = str(now.strftime('%d'))
+    day = str(now.day)
+    month = now.month
+    month = str(month_conversion(month))
+    for i in range(len(urls)):
+        for j in range(1, 3):
+            url = requests.get(urls[i])
+            soup = BeautifulSoup(url.text, features="html.parser")
+            unique = True
+            nadpis = soup.select('.titulek')[j+1].text
+            clanky = Clanek.query.all()
+            for clanek in clanky:
+                if clanek.titulek == nadpis:
+                    unique = False
+            if unique:
+                img = soup.select('.obrazek img')[j+1]['src']
+                url_text = urls[i] + soup.select('.polozka .text a')[j]['href']
+
+                url = requests.get(url_text)
+                soup = BeautifulSoup(url.text, features="html.parser")
+                content = soup.select('.perex')[0].text
+
+                cont = True
+                for clanek in clanky:
+                    if clanek.content == content:
+                        cont = False
+                if cont:
+                    date = day + ". " + month + " " + year + " "
+                    order_date = str(year + month_number + day_number + str(now.strftime('%H')) + str(now.minute))
+                    if len(content) > 300:
+                        content = content[:300] + "..."
+                    time = str(now.hour) + ":" + str(now.minute)
+                    clanek = Clanek(titulek=nadpis, content=content, img=img, date=date, time=time, url=url_text, sluzba=4, order_date=order_date)
+                    db.session.add(clanek)
+                    db.session.commit()
+                    print("Downloaded new article - Aktualne")
+
+
+def reflex():
+    urls = ['https://www.reflex.cz/kategorie/3025/zpravy']
+    now = datetime.now()
+    year = str(now.year)
+    month_number = str(now.strftime('%m'))
+    day_number = str(now.strftime('%d'))
+    day = str(now.day)
+    month = now.month
+    month = str(month_conversion(month))
+    for i in range(len(urls)):
+        for j in range(2):
+            url = requests.get(urls[i])
+            soup = BeautifulSoup(url.text, features="html.parser")
+            unique = True
+            nadpis = soup.select('.title')[j].text
+            clanky = Clanek.query.all()
+            for clanek in clanky:
+                if clanek.titulek == nadpis:
+                    unique = False
+            if unique:
+                img = soup.select('.image-main img')[j]['src']
+                url_text = soup.select('.title a')[j]['href']
+
+                url = requests.get(url_text)
+                soup = BeautifulSoup(url.text, features="html.parser")
+                content = soup.select('.perex')[0].text
+
+                cont = True
+                for clanek in clanky:
+                    if clanek.content == content:
+                        cont = False
+                if cont:
+                    date = day + ". " + month + " " + year
+                    time = soup.select('.datetime')[0].text.split()[4]
+                    order_date = str(year + month_number + day_number + time.split(':')[0] + time.split(':')[1])
+                    if len(content) > 300:
+                        content = content[:300] + "..."
+
+                    clanek = Clanek(titulek=nadpis, content=content, img=img, date=date, time=time, url=url_text, sluzba=5, order_date=order_date)
+                    db.session.add(clanek)
+                    db.session.commit()
+                    print("Downloaded new article - Reflex")
+
+
+def e15():
+    urls = ['https://www.e15.cz/domaci', 'https://www.e15.cz/zahranicni']
+    now = datetime.now()
+    year = str(now.year)
+    month_number = str(now.strftime('%m'))
+    day_number = str(now.strftime('%d'))
+    day = str(now.day)
+    month = now.month
+    month = str(month_conversion(month))
+    for i in range(len(urls)):
+        for j in range(2):
+            url = requests.get(urls[i])
+            soup = BeautifulSoup(url.text, features="html.parser")
+            unique = True
+            nadpis = soup.select('.title')[j+3].text
+            clanky = Clanek.query.all()
+            for clanek in clanky:
+                if clanek.titulek == nadpis:
+                    unique = False
+            if unique:
+                img = soup.select('.image-container img')[j]['src']
+                url_text = soup.select('.title a')[j+3]['href']
+                time = soup.select('.publication-date')[j].text.split()[2]
+
+                url = requests.get(url_text)
+                soup = BeautifulSoup(url.text, features="html.parser")
+                content = soup.select('.perex')[0].text
+
+                cont = True
+                for clanek in clanky:
+                    if clanek.content == content:
+                        cont = False
+                if cont:
+                    date = day + ". " + month + " " + year
+                    order_date = str(year + month_number + day_number + time.split(':')[0] + time.split(':')[1])
+                    if len(content) > 300:
+                        content = content[:300] + "..."
+
+                    clanek = Clanek(titulek=nadpis, content=content, img=img, date=date, time=time, url=url_text, sluzba=6, order_date=order_date)
+                    db.session.add(clanek)
+                    db.session.commit()
+                    print("Downloaded new article - E15")
 
 
 def clanky():

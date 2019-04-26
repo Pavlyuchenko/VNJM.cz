@@ -76,3 +76,65 @@
             transform: rotate(360deg) scale(1);
   }
 }
+
+h1 {
+    color: #2A67C3;
+    font-size: 40px;
+    margin-bottom: 50px;
+}
+
+.div-content{
+    margin-bottom: 70px;
+    margin-left: 120px;
+    min-height: 170px;
+}
+
+h2 {
+    font-weight: normal;
+    font-size: 25px;
+    color: #2A67C3;
+    transition: .2s;
+}
+
+h2:hover{
+    color: #1d4684;
+}
+
+h3 {
+    margin-top: 0px;
+    font-weight: normal;
+    font-size: 24px;
+    color: #D00000;
+    float: left;
+}
+
+.clanek_img {
+    float: left;
+}
+
+.sluzba{
+    margin-left: 25px;
+}
+
+.content {
+    margin-left: 215px;
+    transition: .2s;
+}
+
+.content:hover{
+    color: #686868;
+}
+
+small{
+    margin-left: 25px;
+    color: #2A67C3;
+    float: left;
+}
+
+.main a {
+    color: #000000;
+}
+
+.perex{
+    min-height: 70px;
+}
