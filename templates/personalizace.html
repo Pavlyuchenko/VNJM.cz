@@ -160,9 +160,19 @@
     <div class="section">
         <div id="sport" ></div>
         <p class="h1">Sport</p>
-        <div class="stranka">
-            <img src="{{ url_for('static', filename='idnes.png') }}" alt="iDnes">
-        </div>
+        <form>
+            <a href="#" class="test" id="100">
+                <div class="stranka">
+                    {% if current_user.sportcz %}
+                        <img src="{{ url_for('static', filename='sportcz_chosen.png') }}" onclick="changeImage('sportcz')" id="sportcz" alt="Sport.cz">
+                        <div onclick="changeImage('sportcz')" id="sportcz_anim" class="anim"><div id="sportcz_checkmark" class="checkmark draw"></div></div>
+                    {% else %}
+                        <img src="{{ url_for('static', filename='sportcz.png') }}" onclick="changeImage('sportcz')" id="sportcz" alt="Sport.cz">
+                        <div onclick="changeImage('sportcz')" id="sportcz_anim" class="anim" style="display: none;"><div id="sportcz_checkmark" class="checkmark draw"></div></div>
+                    {% endif %}
+                </div>
+            </a>
+        </form>
         <div class="stranka">
             <img src="{{ url_for('static', filename='seznam.png') }}" alt="Seznam">
         </div>

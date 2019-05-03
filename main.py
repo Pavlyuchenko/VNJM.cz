@@ -21,6 +21,7 @@ def article_download():
     aktualne()
     reflex()
     e15()
+    sportcz()
 
 
 scheduler = BackgroundScheduler()
@@ -62,6 +63,7 @@ class User(db.Model, UserMixin):
     aktualne = db.Column(db.Boolean)
     reflex = db.Column(db.Boolean)
     e15 = db.Column(db.Boolean)
+    sportcz = db.Column(db.Boolean)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
 
@@ -76,11 +78,26 @@ class Clanek(db.Model, UserMixin):
     sluzba = db.Column(db.Integer, nullable=False)
     order_date = db.Column(db.Integer, nullable=False)
 
+
+class Sport(db.Model, UserMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    titulek = db.Column(db.String(1000), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    img = db.Column(db.String(500), nullable=False)
+    date = db.Column(db.String(100), nullable=False)
+    time = db.Column(db.String(10), nullable=False)
+    url = db.Column(db.String(500), nullable=False)
+    sluzba = db.Column(db.Integer, nullable=False)
+    order_date = db.Column(db.Integer, nullable=False)
+
+
 from forms import RegistrationForm, LoginForm
+
 
 admin = Admin(app)
 admin.add_view(ModelView(User, db.session))
 admin.add_view(ModelView(Clanek, db.session))
+admin.add_view(ModelView(Sport, db.session))
 
 
 def login_required(f):
@@ -98,6 +115,12 @@ def login_required(f):
 def novinky():
     sluzby = ['idnes', 'seznam', 'lidovky', 'novinky', 'aktualne', 'reflex', 'e15']
     return render_template('novinky.html', style="novinky.css", title="Vše na jednom místě", clanky=clanky(), sluzby=sluzby)
+
+
+@app.route("/sport")
+def sport():
+    sluzby = ['sportcz']
+    return render_template('novinky.html', style="novinky.css", title="Vše na jednom místě", clanky=sport_clanky(), sluzby=sluzby)
 
 
 @app.route("/personalizace")
@@ -144,6 +167,11 @@ def vyber_sluzby():
         current_user.e15 = True
     elif post == 6:
         current_user.e15 = False
+
+    if post == 100 and not current_user.sportcz:
+        current_user.sportcz = True
+    elif post == 100:
+        current_user.sportcz = False
 
     db.session.commit()
     return ""
@@ -306,11 +334,11 @@ def lidovky():
                     unique = False
 
             if unique:
-                if soup.select('.art .art-info a') is not None:
-                    url_text = soup.select('.art a')[j+j+1]['href']
-                else:
-                    url_text = soup.select('.art a')[j+j]['href']
-
+                a_text = '#assembly-art-' + str(j+1) + " a"
+                try:
+                    url_text = soup.select(a_text)[0]['href']
+                except:
+                    url_text = soup.select('#assembly-art-1')[0]['href']
 
                 url = requests.get(url_text)
                 soup = BeautifulSoup(url.text, features="html.parser")
@@ -324,7 +352,7 @@ def lidovky():
                     if cont:
                         date = " ".join(soup.select('.time')[0].text.split()[:3])
                         time = "".join(soup.select('.time')[0].text.split()[3])
-                        print(time)
+                        time = time.replace(",", "")
                         img = soup.select('.equ-img img')[0]['src']
                         new_date = time.split(',')[0]
                         new_date = " ".join(new_date.split())
@@ -341,6 +369,7 @@ def lidovky():
                         db.session.commit()
                         print("Downloaded new article - Lidovky")
                 except Exception as e:
+                    print(url_text)
                     print(e)
 
 
@@ -472,7 +501,11 @@ def reflex():
                 if cont:
                     date = day + ". " + month + " " + year
                     time = soup.select('.datetime')[0].text.split()[4]
-                    order_date = str(year + month_number + day_number + time.split(':')[0] + time.split(':')[1])
+                    if int(time.split(':')[0]) / 10 > 1:
+                        order_date = str(year + month_number + day_number + time.split(':')[0] + time.split(':')[1])
+                    else:
+                        order_date = str(year + month_number + day_number + str(0) + time.split(':')[0] + time.split(':')[1])
+
                     if len(content) > 300:
                         content = content[:300] + "..."
 
@@ -504,7 +537,11 @@ def e15():
             if unique:
                 img = soup.select('.image-container img')[j]['src']
                 url_text = soup.select('.title a')[j+3]['href']
-                time = soup.select('.publication-date')[j].text.split()[2]
+
+                try:
+                    time = soup.select('.publication-date')[j].text.split()[4]
+                except:
+                    time = soup.select('.publication-date')[j].text.split()[2]
 
                 url = requests.get(url_text)
                 soup = BeautifulSoup(url.text, features="html.parser")
@@ -524,6 +561,52 @@ def e15():
                     db.session.add(clanek)
                     db.session.commit()
                     print("Downloaded new article - E15")
+
+
+def sportcz():
+    urls = ['https://www.sport.cz/']
+    now = datetime.now()
+    year = str(now.year)
+    month_number = str(now.strftime('%m'))
+    day_number = str(now.strftime('%d'))
+    day = str(now.day)
+    month = now.month
+    month = str(month_conversion(month))
+    for i in range(len(urls)):
+        for j in range(2):
+            url = requests.get(urls[i])
+            soup = BeautifulSoup(url.text, features="html.parser")
+            unique = True
+            nadpis = soup.select('#next-articles-0 a .next-article-title span')[j].text
+            clanky = Sport.query.all()
+            for clanek in clanky:
+                if clanek.titulek == nadpis:
+                    unique = False
+            if unique:
+                img = soup.select('#next-articles-0 a img')[j]['src']
+                url_text = 'https://www.sport.cz' + soup.select('#next-articles-0 a')[j]['href']
+
+                time = soup.select('#next-articles-0 a .next-article-time .today')[j+j+1].text
+
+                url = requests.get(url_text)
+                soup = BeautifulSoup(url.text, features="html.parser")
+                content = soup.select('#perex')[0].text
+
+                cont = True
+                for clanek in clanky:
+                    if clanek.content == content:
+                        cont = False
+                if cont:
+                    date = day + ". " + month + " " + year
+                    print(time)
+                    order_date = str(year + month_number + day_number + time.split(':')[0] + time.split(':')[1])
+                    if len(content) > 300:
+                        content = content[:300] + "..."
+
+                    clanek = Sport(titulek=nadpis, content=content, img=img, date=date, time=time, url=url_text, sluzba=100, order_date=order_date)
+                    db.session.add(clanek)
+                    db.session.commit()
+                    print("Downloaded new article - Sport.cz")
 
 
 def clanky():
@@ -550,6 +633,24 @@ def clanky():
         return clanky_personalized
     else:
         clanky = Clanek.query.order_by(Clanek.order_date.desc()).all()
+        clanky_personalized = []
+        for clanek in clanky:
+            clanky_personalized.append(clanek)
+        return clanky_personalized
+
+
+def sport_clanky():
+    if current_user.is_authenticated:
+        clanky = Sport.query.order_by(Sport.order_date.desc()).all()
+        clanky_personalized = []
+        for clanek in clanky:
+            if clanek.sluzba == 100 and current_user.sportcz:
+                clanky_personalized.append(clanek)
+            # elif clanek.sluzba == 1 and current_user.seznam:
+            #     clanky_personalized.append(clanek)
+        return clanky_personalized
+    else:
+        clanky = Sport.query.order_by(Sport.order_date.desc()).all()
         clanky_personalized = []
         for clanek in clanky:
             clanky_personalized.append(clanek)
